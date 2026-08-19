@@ -1,19 +1,11 @@
-# HSPS - Streamlit v2.1
+# HSPS - Streamlit v2.2
 
-Cambios:
-- Se eliminó el botón "Enviar respuestas por WhatsApp".
-- Se conserva únicamente "Generar PDF con mis respuestas".
-- Se aumentó el alto disponible del componente para evitar que el formulario se corte en iPhone.
-- Se añadió intento de autoajuste de altura del iframe al cargar, rotar o redimensionar la pantalla.
-- En móvil, las cinco opciones se distribuyen en dos columnas para reducir la longitud vertical del formulario.
-- Se mantiene el guardado local de respuestas en el navegador.
-- No hay puntuación ni interpretación automática.
-- No se almacenan respuestas en una base de datos.
+Corrección:
+- Las respuestas usan `sessionStorage` en lugar de `localStorage`.
+- Se conservan mientras el usuario sigue en la misma pestaña/sesión.
+- Al abrir una sesión nueva no deberían reaparecer respuestas antiguas.
+- Se añadió “Iniciar cuestionario en blanco” con confirmación.
+- Se mantiene únicamente “Generar PDF con mis respuestas”.
+- No hay base de datos, puntuación ni interpretación automática.
 
-## Actualización
-Reemplaza en GitHub:
-- app.py
-- hsps_form.html
-- requirements.txt
-
-Haz Commit changes. Streamlit debería redeployar automáticamente.
+Para actualizar la app en GitHub, reemplaza `app.py`, `hsps_form.html` y `requirements.txt`, y haz Commit.

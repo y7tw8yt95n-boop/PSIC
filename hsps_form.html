@@ -28,6 +28,8 @@ h1{font-size:24px;line-height:1.25;text-align:center;margin:4px 0 22px}
 .option span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:14px;transition:.15s}
 .option input:checked + span{border-color:var(--accent);box-shadow:0 0 0 2px rgba(42,122,131,.15);background:#f0f8f8;font-weight:700}
 .actions{margin-top:24px;display:grid;gap:10px}
+.new-session-bar{margin:0 0 18px}
+.secondary{background:#fff;color:#35515a;border:1px solid var(--line);font-size:14px;padding:10px 14px}
 button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:700;cursor:pointer;width:100%}
 .pdfbtn{background:#2f5f8f;color:white}
 .whatsapp{background:#1f7a43;color:white}
@@ -95,6 +97,10 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
 </div>
 
 <div id="progressBox" class="progress"><strong>0 de 27</strong> preguntas respondidas.</div>
+<div class="new-session-bar">
+  <button class="secondary" type="button" id="newBtn">Iniciar cuestionario en blanco</button>
+</div>
+
 
 <form id="hspsForm" autocomplete="off">
 <fieldset class="question" id="question-1">
@@ -592,7 +598,7 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
 <div id="status" class="status" role="status" aria-live="polite"></div>
 
 <div class="note">
-Las respuestas se conservan únicamente en este navegador durante el uso del cuestionario.
+Las respuestas se conservan únicamente durante esta sesión del cuestionario en la pestaña actual del navegador.
 La herramienta no calcula puntuaciones ni realiza interpretaciones clínicas.
 Al finalizar, puedes generar un PDF con las respuestas seleccionadas. El PDF se crea mediante la función de impresión/PDF del propio dispositivo, sin almacenar las respuestas en una base de datos.
 </div>
@@ -648,6 +654,7 @@ const form = document.getElementById('hspsForm');
 const statusBox = document.getElementById('status');
 const clearBtn = document.getElementById('clearBtn');
 const pdfBtn = document.getElementById('pdfBtn');
+const newBtn = document.getElementById('newBtn');
 const progressBox = document.getElementById('progressBox');
 const printDocument = document.getElementById('printDocument');
 const STORAGE_KEY = 'hsps_respuestas_streamlit_v2';
@@ -662,12 +669,12 @@ function collectSavedData() {
 }
 function saveResponses() {
   const data = collectSavedData();
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
+  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (_) {}
   updateProgress();
 }
 function restoreResponses() {
   let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (_) {}
+  try { saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}'); } catch (_) {}
   Object.entries(saved).forEach(([name,value]) => {
     for (const input of document.querySelectorAll(`input[name="${name}"]`)) {
       if (input.value === value) input.checked = true;
@@ -769,10 +776,22 @@ pdfBtn.addEventListener('click', () => {
 });
 
 
+
+newBtn.addEventListener('click', () => {
+  if (!confirm('¿Deseas iniciar un cuestionario nuevo? Esto borrará las respuestas de esta sesión.')) return;
+  form.reset();
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
+  document.querySelectorAll('.question.missing').forEach(el => el.classList.remove('missing'));
+  statusBox.className = 'status';
+  statusBox.textContent = '';
+  updateProgress();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
 clearBtn.addEventListener('click', () => {
   if (!confirm('Esto borrará las 27 respuestas guardadas en este navegador. ¿Deseas continuar?')) return;
   form.reset();
-  try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch (_) {}
   document.querySelectorAll('.question.missing').forEach(el => el.classList.remove('missing'));
   statusBox.className = 'status'; statusBox.textContent = '';
   updateProgress();
