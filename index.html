@@ -32,6 +32,7 @@ h1{font-size:24px;line-height:1.25;text-align:center;margin:4px 0 22px}
 .new-session-bar{margin:0 0 18px}
 .secondary{background:#fff;color:#35515a;border:1px solid var(--line);font-size:14px;padding:10px 14px}
 button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:700;cursor:pointer;width:100%}
+.sharepdf{background:#1f7a43;color:white}
 .pdfbtn{background:#2f5f8f;color:white}
 .whatsapp{background:#1f7a43;color:white}
 .danger{background:#fff;color:#9b2c2c;border:1px solid #e2b8b8;padding:10px 14px;font-size:14px;width:auto}
@@ -573,7 +574,8 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
 </fieldset>
 
 <div class="actions">
-<button class="pdfbtn" type="button" id="pdfBtn">Abrir PDF con mis respuestas</button>
+<button class="sharepdf" type="button" id="sharePdfBtn">Compartir PDF</button>
+<button class="pdfbtn" type="button" id="pdfBtn">Abrir / guardar PDF</button>
 </div>
 
 <div id="status" class="status" role="status" aria-live="polite"></div>
@@ -581,7 +583,7 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
 <div class="note">
 Las respuestas se conservan únicamente durante esta sesión del cuestionario en la pestaña actual del navegador.
 La herramienta no calcula puntuaciones ni realiza interpretaciones clínicas.
-Al finalizar, puedes abrir un PDF con las respuestas seleccionadas. El archivo se genera directamente en el navegador y se abre como documento PDF, sin pasar por la pantalla de impresión ni almacenarse en una base de datos.
+Al finalizar, puedes compartir directamente el PDF desde el teléfono o abrirlo/guardarlo. El archivo se genera directamente en el navegador y no se almacena en una base de datos.
 </div>
 
 <details class="form-tools">
@@ -632,6 +634,7 @@ const form = document.getElementById('hspsForm');
 const statusBox = document.getElementById('status');
 const clearBtn = document.getElementById('clearBtn');
 const pdfBtn = document.getElementById('pdfBtn');
+const sharePdfBtn = document.getElementById('sharePdfBtn');
 const newBtn = document.getElementById('newBtn');
 const progressBox = document.getElementById('progressBox');
 const STORAGE_KEY = 'hsps_respuestas_streamlit_v2';
@@ -789,6 +792,41 @@ function generatePdfBlob(responses) {
   return doc.output('blob');
 }
 
+
+function buildPdfFile(responses) {
+  const blob = generatePdfBlob(responses);
+  return new File([blob], 'Cuestionario_HSPS_respuestas.pdf', { type: 'application/pdf' });
+}
+
+async function sharePdfDocument(responses) {
+  try {
+    const file = buildPdfFile(responses);
+
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+      await navigator.share({
+        files: [file],
+        title: 'Cuestionario HSPS',
+        text: 'Cuestionario HSPS contestado en PDF.'
+      });
+      statusBox.className = 'status ok';
+      statusBox.innerHTML = '<strong>PDF listo.</strong> Se abrió el menú de compartir del dispositivo.';
+      return;
+    }
+
+    statusBox.className = 'status ok';
+    statusBox.innerHTML = '<strong>Tu navegador no permite compartir archivos directamente.</strong> Usa “Abrir / guardar PDF” y compártelo desde el visor del documento.';
+  } catch (err) {
+    if (err && err.name === 'AbortError') {
+      statusBox.className = 'status ok';
+      statusBox.textContent = 'Se canceló el envío. Tus respuestas permanecen guardadas en esta sesión.';
+      return;
+    }
+    console.error(err);
+    statusBox.className = 'status err';
+    statusBox.textContent = 'No fue posible abrir el menú de compartir. Usa “Abrir / guardar PDF” como alternativa.';
+  }
+}
+
 function openPdfDocument(responses) {
   const pdfTab = window.open('', '_blank');
   try {
@@ -806,7 +844,7 @@ function openPdfDocument(responses) {
       a.remove();
     }
     statusBox.className = 'status ok';
-    statusBox.innerHTML = '<strong>PDF generado.</strong> Se abrió como documento en una pestaña nueva. En iPhone usa el botón Compartir del visor para enviarlo por WhatsApp o guardarlo en Archivos.';
+    statusBox.innerHTML = '<strong>PDF generado.</strong> Se abrió como documento en una pestaña nueva. Puedes guardarlo o compartirlo desde el visor del dispositivo.';
     setTimeout(() => URL.revokeObjectURL(blobUrl), 120000);
   } catch (err) {
     if (pdfTab) pdfTab.close();
@@ -827,6 +865,14 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') saveResponses(); else restoreResponses();
 });
 restoreResponses();
+
+
+sharePdfBtn.addEventListener('click', async () => {
+  const responses = validateComplete();
+  if (!responses) return;
+  saveResponses();
+  await sharePdfDocument(responses);
+});
 
 pdfBtn.addEventListener('click', () => {
   const responses = validateComplete();

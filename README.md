@@ -1,21 +1,21 @@
-# HSPS - GitHub Pages
+# HSPS - GitHub Pages v1.1
 
 Versión estática del cuestionario HSPS.
 
+## Cambio principal
+- Añade **Compartir PDF**.
+- En navegadores compatibles genera el PDF y abre el menú nativo de compartir con el archivo adjunto.
+- El usuario puede elegir WhatsApp u otra aplicación.
+- Se conserva **Abrir / guardar PDF** como alternativa.
+
 ## Publicación
-Configura GitHub Pages con:
 - Source: Deploy from a branch
 - Branch: main
 - Folder: / (root)
 
-El archivo principal es `index.html`.
-
-## Funcionamiento
-- No requiere Streamlit ni servidor Python.
+## Privacidad
+- No solicita datos personales.
 - Las respuestas se mantienen temporalmente en `sessionStorage`.
-- No se almacenan en una base de datos.
-- El PDF se genera directamente en el navegador.
+- No hay base de datos.
+- El PDF se genera localmente en el navegador.
 - No hay puntuación ni interpretación automática.
-
-Para un repositorio llamado `PSIC`, la URL esperada será:
-`https://USUARIO.github.io/PSIC/`
