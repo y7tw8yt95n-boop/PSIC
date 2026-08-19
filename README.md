@@ -1,16 +1,19 @@
-# HSPS - Streamlit v2
+# HSPS - Streamlit v2.1
 
-Cambios principales:
-- Añade "Generar PDF con mis respuestas".
-- El PDF conserva el formato de dos páginas del cuestionario: logo, título, instrucciones, tabla de 27 reactivos, opciones y marcas X.
-- Resultado e Interpretación quedan en blanco para la profesional.
+Cambios:
+- Se eliminó el botón "Enviar respuestas por WhatsApp".
+- Se conserva únicamente "Generar PDF con mis respuestas".
+- Se aumentó el alto disponible del componente para evitar que el formulario se corte en iPhone.
+- Se añadió intento de autoajuste de altura del iframe al cargar, rotar o redimensionar la pantalla.
+- En móvil, las cinco opciones se distribuyen en dos columnas para reducir la longitud vertical del formulario.
+- Se mantiene el guardado local de respuestas en el navegador.
 - No hay puntuación ni interpretación automática.
-- Las respuestas continúan guardándose solamente en el navegador.
-- La creación del PDF usa la función de impresión/PDF del dispositivo: no se suben respuestas a una base de datos.
+- No se almacenan respuestas en una base de datos.
 
-## Actualizar la app ya publicada
-En GitHub, reemplaza `app.py`, `hsps_form.html` y `requirements.txt` por estos archivos.
-Streamlit Community Cloud detectará el commit y volverá a desplegar automáticamente.
+## Actualización
+Reemplaza en GitHub:
+- app.py
+- hsps_form.html
+- requirements.txt
 
-## iPhone
-Al pulsar "Generar PDF con mis respuestas", Safari/iOS abre la interfaz de impresión. Desde la vista previa se puede usar Compartir para guardar o enviar el PDF por WhatsApp.
+Haz Commit changes. Streamlit debería redeployar automáticamente.

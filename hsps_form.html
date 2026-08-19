@@ -48,7 +48,8 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
   .wrap{padding:0 0 35px} .card{border-radius:0;border-left:0;border-right:0}
   .header{padding:16px;gap:12px} .logo{width:82px} .brand{font-size:23px}
   .content{padding:18px 14px} h1{font-size:20px}
-  .options{grid-template-columns:1fr}
+  .options{grid-template-columns:repeat(2,1fr)}
+  .option:last-child:nth-child(odd){grid-column:1 / -1}
   .option span{justify-content:flex-start;padding-left:14px;min-height:46px}
 }
 
@@ -586,7 +587,6 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
 
 <div class="actions">
 <button class="pdfbtn" type="button" id="pdfBtn">Generar PDF con mis respuestas</button>
-<button class="whatsapp" type="button" id="shareBtn">Enviar respuestas por WhatsApp</button>
 </div>
 
 <div id="status" class="status" role="status" aria-live="polite"></div>
@@ -594,7 +594,7 @@ button{border:0;border-radius:9px;padding:14px 18px;font-size:16px;font-weight:7
 <div class="note">
 Las respuestas se conservan únicamente en este navegador durante el uso del cuestionario.
 La herramienta no calcula puntuaciones ni realiza interpretaciones clínicas.
-El PDF se genera mediante la función de impresión/PDF del propio dispositivo, sin almacenar las respuestas en una base de datos.
+Al finalizar, puedes generar un PDF con las respuestas seleccionadas. El PDF se crea mediante la función de impresión/PDF del propio dispositivo, sin almacenar las respuestas en una base de datos.
 </div>
 
 <details class="form-tools">
@@ -647,7 +647,6 @@ const OPTIONS = ['Nunca', 'Rara vez', 'A veces', 'Casi siempre', 'Siempre'];
 const form = document.getElementById('hspsForm');
 const statusBox = document.getElementById('status');
 const clearBtn = document.getElementById('clearBtn');
-const shareBtn = document.getElementById('shareBtn');
 const pdfBtn = document.getElementById('pdfBtn');
 const progressBox = document.getElementById('progressBox');
 const printDocument = document.getElementById('printDocument');
@@ -769,19 +768,6 @@ pdfBtn.addEventListener('click', () => {
   openPrintPDF(responses);
 });
 
-shareBtn.addEventListener('click', () => {
-  const responses = validateComplete();
-  if (!responses) return;
-  const lines = ['Cuestionario de Altasensibilidad (HSPS)', ''];
-  responses.forEach((r, idx) => lines.push(`${idx+1}. ${r}`));
-  const url = 'https://wa.me/?text=' + encodeURIComponent(lines.join('\n'));
-  statusBox.className = 'status ok';
-  statusBox.textContent = 'Cuestionario completo. Se abrirá WhatsApp; las respuestas permanecerán guardadas en este navegador.';
-  const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
-  if (!newWindow) {
-    statusBox.innerHTML = 'WhatsApp no se abrió automáticamente. <a href="' + url + '" target="_blank" rel="noopener noreferrer">Toca aquí para abrir WhatsApp</a>.';
-  }
-});
 
 clearBtn.addEventListener('click', () => {
   if (!confirm('Esto borrará las 27 respuestas guardadas en este navegador. ¿Deseas continuar?')) return;
@@ -792,6 +778,28 @@ clearBtn.addEventListener('click', () => {
   updateProgress();
   window.scrollTo({top:0, behavior:'smooth'});
 });
+
+function notifyParentHeight() {
+  try {
+    const h = Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight
+    );
+    window.parent.postMessage({
+      isStreamlitMessage: true,
+      type: "streamlit:setFrameHeight",
+      height: h
+    }, "*");
+  } catch (_) {}
+}
+window.addEventListener('load', () => {
+  notifyParentHeight();
+  setTimeout(notifyParentHeight, 300);
+  setTimeout(notifyParentHeight, 1000);
+});
+window.addEventListener('resize', () => setTimeout(notifyParentHeight, 100));
+window.addEventListener('orientationchange', () => setTimeout(notifyParentHeight, 400));
+
 </script>
 </body>
 </html>

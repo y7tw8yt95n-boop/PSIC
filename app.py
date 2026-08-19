@@ -28,4 +28,4 @@ st.markdown(
 )
 
 html = Path(__file__).with_name("hsps_form.html").read_text(encoding="utf-8")
-components.html(html, height=9300, scrolling=False)
+components.html(html, height=15000, scrolling=False)
