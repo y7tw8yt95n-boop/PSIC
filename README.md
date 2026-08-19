@@ -1,10 +1,21 @@
-# HSPS - Streamlit v2.3 - PDF directo
+# HSPS - GitHub Pages
 
-- Ya no abre la pantalla de impresión.
-- Genera un PDF real directamente en el navegador con jsPDF.
-- El PDF se abre en una pestaña/visor nuevo; en iPhone puede compartirse desde el botón Compartir del visor.
-- Mantiene dos páginas, logo, instrucciones, 27 reactivos, respuestas marcadas, referencias y Resultado/Interpretación en blanco.
-- Las respuestas no se envían al backend ni se almacenan en base de datos.
-- Se mantiene sessionStorage durante la sesión.
+Versión estática del cuestionario HSPS.
 
-Actualiza en GitHub: `app.py`, `hsps_form.html` y `requirements.txt`, luego haz Commit changes.
+## Publicación
+Configura GitHub Pages con:
+- Source: Deploy from a branch
+- Branch: main
+- Folder: / (root)
+
+El archivo principal es `index.html`.
+
+## Funcionamiento
+- No requiere Streamlit ni servidor Python.
+- Las respuestas se mantienen temporalmente en `sessionStorage`.
+- No se almacenan en una base de datos.
+- El PDF se genera directamente en el navegador.
+- No hay puntuación ni interpretación automática.
+
+Para un repositorio llamado `PSIC`, la URL esperada será:
+`https://USUARIO.github.io/PSIC/`
