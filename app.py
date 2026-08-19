@@ -9,7 +9,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Reducimos al mínimo la interfaz propia de Streamlit.
 st.markdown(
     '''
     <style>
@@ -28,9 +27,5 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-html_path = Path(__file__).with_name("hsps_form.html")
-html = html_path.read_text(encoding="utf-8")
-
-# El cuestionario vive dentro de HTML/JavaScript del navegador.
-# Las respuestas NO se envían al código Python de Streamlit.
-components.html(html, height=9200, scrolling=False)
+html = Path(__file__).with_name("hsps_form.html").read_text(encoding="utf-8")
+components.html(html, height=9300, scrolling=False)
