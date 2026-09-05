@@ -1,0 +1,17 @@
+PRUEBAS DE LÍMITES - HSPS v1.2
+
+27  -> Baja sensibilidad
+54  -> Baja sensibilidad
+55  -> Sensibilidad media
+81  -> Sensibilidad media
+82  -> Alta sensibilidad
+108 -> Alta sensibilidad
+109 -> Muy alta sensibilidad
+135 -> Muy alta sensibilidad
+
+Verificar en cada caso:
+1. Puntaje total correcto.
+2. Clasificación correcta.
+3. Texto clínico correcto.
+4. Nota final presente.
+5. PDF con las 27 respuestas marcadas.

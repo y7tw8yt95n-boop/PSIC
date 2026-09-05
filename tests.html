@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pruebas HSPS</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f5f7f8;color:#1c2328}
+.wrap{max-width:1000px;margin:0 auto;padding:24px}
+.card{background:#fff;border:1px solid #d8dee3;border-radius:12px;padding:20px;margin-bottom:18px}
+h1{margin-top:0}.ok{color:#137333}.fail{color:#b3261e}.muted{color:#65727c}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid #d8dee3;padding:7px 8px;text-align:left}
+th{background:#f4f6f8}.pill{font-weight:700}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.metric{background:#f8fafb;border:1px solid #d8dee3;border-radius:10px;padding:14px;text-align:center}
+.metric strong{display:block;font-size:28px}
+button{background:#2f5f8f;color:#fff;border:0;border-radius:8px;padding:11px 16px;font-weight:700;cursor:pointer}
+@media(max-width:700px){.summary{grid-template-columns:1fr}.wrap{padding:12px}table{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Pruebas automáticas HSPS</h1>
+    <p class="muted">Valida los 109 puntajes posibles (27–135), los cambios de rango y una combinación válida de 27 respuestas para cada puntaje.</p>
+    <button id="run">Ejecutar pruebas</button>
+  </div>
+
+  <div class="card summary">
+    <div class="metric"><span>Total</span><strong id="total">0</strong></div>
+    <div class="metric"><span>Correctas</span><strong class="ok" id="passed">0</strong></div>
+    <div class="metric"><span>Errores</span><strong class="fail" id="failed">0</strong></div>
+  </div>
+
+  <div class="card">
+    <h2>Límites críticos</h2>
+    <table>
+      <thead><tr><th>Puntaje</th><th>Esperado</th><th>Obtenido</th><th>Estado</th></tr></thead>
+      <tbody id="boundaries"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Todos los puntajes</h2>
+    <table>
+      <thead><tr><th>Puntaje</th><th>Clasificación esperada</th><th>Clasificación obtenida</th><th>Suma reconstruida</th><th>Estado</th></tr></thead>
+      <tbody id="results"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const SCORE_MAP = {"Nunca":1,"Rara vez":2,"A veces":3,"Casi siempre":4,"Siempre":5};
+const VALUES_TO_RESPONSE = {1:"Nunca",2:"Rara vez",3:"A veces",4:"Casi siempre",5:"Siempre"};
+
+function expectedCategory(total){
+  if(total>=27 && total<=54) return "Baja sensibilidad";
+  if(total<=81) return "Sensibilidad media";
+  if(total<=108) return "Alta sensibilidad";
+  if(total<=135) return "Muy alta sensibilidad";
+  throw new Error("Fuera de rango");
+}
+
+function appCategory(total){
+  if(total>=27 && total<=54) return "Baja sensibilidad";
+  if(total>=55 && total<=81) return "Sensibilidad media";
+  if(total>=82 && total<=108) return "Alta sensibilidad";
+  if(total>=109 && total<=135) return "Muy alta sensibilidad";
+  throw new Error("Puntaje fuera del rango esperado.");
+}
+
+function responsesForTarget(target){
+  let extra = target - 27;
+  const values = Array(27).fill(1);
+  for(let i=0;i<27 && extra>0;i++){
+    const add = Math.min(4, extra);
+    values[i] += add;
+    extra -= add;
+  }
+  if(extra!==0) throw new Error("No se pudo construir el puntaje "+target);
+  return values.map(v=>VALUES_TO_RESPONSE[v]);
+}
+
+function calculateScore(responses){
+  return responses.reduce((sum,r)=>sum+SCORE_MAP[r],0);
+}
+
+function run(){
+  const tbody=document.getElementById('results');
+  const bbody=document.getElementById('boundaries');
+  tbody.innerHTML=''; bbody.innerHTML='';
+  let passed=0, failed=0, totalTests=0;
+
+  for(let score=27;score<=135;score++){
+    totalTests++;
+    const responses=responsesForTarget(score);
+    const rebuilt=calculateScore(responses);
+    const expected=expectedCategory(score);
+    const actual=appCategory(rebuilt);
+    const ok=(rebuilt===score && actual===expected);
+    if(ok) passed++; else failed++;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${score}</td><td>${expected}</td><td>${actual}</td><td>${rebuilt}</td><td class="${ok?'ok':'fail'} pill">${ok?'PASS':'FAIL'}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  [27,54,55,81,82,108,109,135].forEach(score=>{
+    const expected=expectedCategory(score);
+    const actual=appCategory(score);
+    const ok=expected===actual;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${score}</td><td>${expected}</td><td>${actual}</td><td class="${ok?'ok':'fail'} pill">${ok?'PASS':'FAIL'}</td>`;
+    bbody.appendChild(tr);
+  });
+
+  document.getElementById('total').textContent=totalTests;
+  document.getElementById('passed').textContent=passed;
+  document.getElementById('failed').textContent=failed;
+}
+document.getElementById('run').addEventListener('click',run);
+run();
+</script>
+</body>
+</html>

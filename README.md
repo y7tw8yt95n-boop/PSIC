@@ -1,21 +1,48 @@
-# HSPS - GitHub Pages v1.1
+# HSPS - GitHub Pages v1.2.2
 
-Versión estática del cuestionario HSPS.
+Corrección solicitada:
+- El resultado numérico se coloca en la misma línea de RESULTADO.
+- La clasificación se coloca en la misma línea de INTERPRETACIÓN.
+- Debajo de INTERPRETACIÓN aparece el texto clínico correspondiente.
+- No se agregan líneas/subrayados nuevos.
+- Se elimina la tercera página de resultados; el PDF vuelve a ser de dos páginas.
 
-## Cambio principal
-- Añade **Compartir PDF**.
-- En navegadores compatibles genera el PDF y abre el menú nativo de compartir con el archivo adjunto.
-- El usuario puede elegir WhatsApp u otra aplicación.
-- Se conserva **Abrir / guardar PDF** como alternativa.
+Lógica:
+- Nunca = 1
+- Rara vez = 2
+- A veces = 3
+- Casi siempre = 4
+- Siempre = 5
 
-## Publicación
-- Source: Deploy from a branch
-- Branch: main
-- Folder: / (root)
+Rangos:
+- 27–54: Baja sensibilidad
+- 55–81: Sensibilidad media
+- 82–108: Alta sensibilidad
+- 109–135: Muy alta sensibilidad
 
-## Privacidad
-- No solicita datos personales.
-- Las respuestas se mantienen temporalmente en `sessionStorage`.
-- No hay base de datos.
-- El PDF se genera localmente en el navegador.
-- No hay puntuación ni interpretación automática.
+La nota final clínica se muestra debajo del texto de interpretación.
+
+
+## Pruebas automáticas
+
+### Panel en navegador
+Abre:
+`https://y7tw8yt95n-boop.github.io/PSIC/tests.html`
+
+Valida automáticamente los 109 puntajes posibles (27–135) y los límites críticos.
+
+### Playwright
+Requisitos: Node.js 20+.
+
+```bash
+npm install
+npx playwright install
+npm test
+```
+
+Ejecuta pruebas en:
+- Chromium escritorio
+- WebKit emulando iPhone
+- Chromium emulando Android
+
+También se incluye GitHub Actions en `.github/workflows/hsps-tests.yml` para ejecutar pruebas automáticamente en cada push o pull request.
