@@ -594,6 +594,7 @@ Al finalizar, puedes compartir directamente el PDF desde el teléfono o abrirlo/
 </details>
 </form>
 
+<div class="note" style="margin-top:18px;text-align:center;">Versión 1.2</div>
 <div class="ref">Psychology Research and Behavior Management, 2021; volumen 14; páginas 1041-1052. Autores originales Elaine Aron, &amp; Arthur Aron</div>
 </div>
 </main>
@@ -693,7 +694,57 @@ function escapeHTML(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+
+const SCORE_MAP = {
+  "Nunca": 1,
+  "Rara vez": 2,
+  "A veces": 3,
+  "Casi siempre": 4,
+  "Siempre": 5
+};
+
+const CLINICAL_NOTE = "No representa un trastorno psicológico, sino un rasgo temperamental que puede convertirse en una fortaleza o en una fuente de vulnerabilidad dependiendo de los recursos de afrontamiento disponibles.";
+
+function calculateScore(responses) {
+  return responses.reduce((sum, response) => sum + SCORE_MAP[response], 0);
+}
+
+function getInterpretation(total) {
+  if (total >= 27 && total <= 54) {
+    return {
+      category: "Baja sensibilidad",
+      text: "La persona suele tolerar adecuadamente los estímulos ambientales y emocionales. Presenta menor tendencia a la sobreestimulación y menor reactividad frente a cambios o demandas externas."
+    };
+  }
+
+  if (total >= 55 && total <= 81) {
+    return {
+      category: "Sensibilidad media",
+      text: "La persona muestra una adecuada capacidad para percibir matices emocionales y ambientales, aunque generalmente logra adaptarse sin experimentar una sobrecarga significativa."
+    };
+  }
+
+  if (total >= 82 && total <= 108) {
+    return {
+      category: "Alta sensibilidad",
+      text: "Se observan características compatibles con el rasgo de Persona Altamente Sensible (PAS), incluyendo:\n• Procesamiento profundo de la información.\n• Elevada percepción de detalles y sutilezas.\n• Mayor empatía.\n• Tendencia a la sobreestimulación.\n• Necesidad de espacios de recuperación emocional.\n• Reacción intensa ante experiencias positivas y negativas."
+    };
+  }
+
+  if (total >= 109 && total <= 135) {
+    return {
+      category: "Muy alta sensibilidad",
+      text: "El rasgo de alta sensibilidad se encuentra marcadamente presente. La persona puede experimentar:\n• Sobrecarga sensorial frecuente.\n• Profunda conciencia emocional.\n• Alta capacidad empática.\n• Gran sensibilidad a ambientes caóticos.\n• Necesidad importante de regulación y autocuidado."
+    };
+  }
+
+  throw new Error("Puntaje fuera del rango esperado.");
+}
+
 function generatePdfBlob(responses) {
+  const totalScore = calculateScore(responses);
+  const interpretation = getInterpretation(totalScore);
+
   if (!window.jspdf || !window.jspdf.jsPDF) {
     throw new Error('No se pudo cargar el generador de PDF.');
   }
@@ -780,13 +831,37 @@ function generatePdfBlob(responses) {
   doc.addPage();
   addHeader(false);
   drawTable(16,27,39);
-  const y = Math.min((doc.lastAutoTable?.finalY || 210) + 10, 245);
+  let y = (doc.lastAutoTable?.finalY || 205) + 8;
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.text('RESULTADO', marginX, y);
+
   doc.setFont('helvetica','normal');
-  doc.setFontSize(9.5);
-  doc.text('RESULTADO:', marginX+4, y);
-  doc.line(marginX+27, y+0.7, marginX+62, y+0.7);
-  doc.text('INTERPRETACIÓN:', marginX+4, y+12);
-  doc.line(marginX+37, y+12.7, 195, y+12.7);
+  doc.setFontSize(9.2);
+  y += 6;
+  doc.text(`Puntaje total: ${totalScore} de 135`, marginX, y);
+
+  y += 5;
+  doc.setFont('helvetica','bold');
+  doc.text(`Clasificación: ${interpretation.category}`, marginX, y);
+
+  y += 8;
+  doc.setFont('helvetica','bold');
+  doc.text('INTERPRETACIÓN CLÍNICA', marginX, y);
+
+  y += 5;
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8.2);
+  const interpretationLines = doc.splitTextToSize(interpretation.text, 184);
+  doc.text(interpretationLines, marginX, y);
+  y += interpretationLines.length * 3.8 + 5;
+
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(7.8);
+  const noteLines = doc.splitTextToSize(CLINICAL_NOTE, 184);
+  doc.text(noteLines, marginX, y);
+
   addReference(2);
 
   return doc.output('blob');
