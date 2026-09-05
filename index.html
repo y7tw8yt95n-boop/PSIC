@@ -594,7 +594,7 @@ Al finalizar, puedes compartir directamente el PDF desde el teléfono o abrirlo/
 </details>
 </form>
 
-<div class="note" style="margin-top:18px;text-align:center;">Versión 1.2</div>
+<div class="note" style="margin-top:18px;text-align:center;">Versión 1.2.1</div>
 <div class="ref">Psychology Research and Behavior Management, 2021; volumen 14; páginas 1041-1052. Autores originales Elaine Aron, &amp; Arthur Aron</div>
 </div>
 </main>
@@ -828,41 +828,52 @@ function generatePdfBlob(responses) {
   drawTable(1,15,table1Y);
   addReference(1);
 
+  // Página 2: reactivos 16–27
   doc.addPage();
   addHeader(false);
   drawTable(16,27,39);
-  let y = (doc.lastAutoTable?.finalY || 205) + 8;
+  addReference(2);
+
+  // Página 3: resultado e interpretación.
+  // Se usa una página independiente para evitar que el contenido quede
+  // fuera del área visible en móviles o por variaciones de altura de tabla.
+  doc.addPage();
+  addHeader(true);
+
+  let y = 58;
 
   doc.setFont('helvetica','bold');
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.text('RESULTADO', marginX, y);
 
+  y += 8;
   doc.setFont('helvetica','normal');
-  doc.setFontSize(9.2);
-  y += 6;
+  doc.setFontSize(11);
   doc.text(`Puntaje total: ${totalScore} de 135`, marginX, y);
 
-  y += 5;
+  y += 7;
   doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
   doc.text(`Clasificación: ${interpretation.category}`, marginX, y);
 
-  y += 8;
+  y += 12;
   doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
   doc.text('INTERPRETACIÓN CLÍNICA', marginX, y);
 
-  y += 5;
+  y += 7;
   doc.setFont('helvetica','normal');
-  doc.setFontSize(8.2);
+  doc.setFontSize(9.2);
   const interpretationLines = doc.splitTextToSize(interpretation.text, 184);
   doc.text(interpretationLines, marginX, y);
-  y += interpretationLines.length * 3.8 + 5;
+  y += interpretationLines.length * 4.3 + 10;
 
   doc.setFont('helvetica','italic');
-  doc.setFontSize(7.8);
+  doc.setFontSize(8.5);
   const noteLines = doc.splitTextToSize(CLINICAL_NOTE, 184);
   doc.text(noteLines, marginX, y);
 
-  addReference(2);
+  addReference(3);
 
   return doc.output('blob');
 }
