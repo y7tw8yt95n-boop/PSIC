@@ -594,7 +594,7 @@ Al finalizar, puedes compartir directamente el PDF desde el teléfono o abrirlo/
 </details>
 </form>
 
-<div class="note" style="margin-top:18px;text-align:center;">Versión 1.2.1</div>
+<div class="note" style="margin-top:18px;text-align:center;">Versión 1.2.2.2</div>
 <div class="ref">Psychology Research and Behavior Management, 2021; volumen 14; páginas 1041-1052. Autores originales Elaine Aron, &amp; Arthur Aron</div>
 </div>
 </main>
@@ -828,52 +828,41 @@ function generatePdfBlob(responses) {
   drawTable(1,15,table1Y);
   addReference(1);
 
-  // Página 2: reactivos 16–27
+
+  // Página 2: reactivos 16–27 + resultado e interpretación en las líneas existentes
   doc.addPage();
   addHeader(false);
   drawTable(16,27,39);
-  addReference(2);
 
-  // Página 3: resultado e interpretación.
-  // Se usa una página independiente para evitar que el contenido quede
-  // fuera del área visible en móviles o por variaciones de altura de tabla.
-  doc.addPage();
-  addHeader(true);
+  const resultY = Math.min((doc.lastAutoTable?.finalY || 205) + 10, 228);
 
-  let y = 58;
-
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(12);
-  doc.text('RESULTADO', marginX, y);
-
-  y += 8;
+  // RESULTADO: solo número y máximo, usando la línea ya prevista en el formato.
   doc.setFont('helvetica','normal');
-  doc.setFontSize(11);
-  doc.text(`Puntaje total: ${totalScore} de 135`, marginX, y);
+  doc.setFontSize(9.5);
+  doc.text('RESULTADO:', marginX+4, resultY);
+  doc.text(`${totalScore} / 135`, marginX+28, resultY);
 
-  y += 7;
+  // INTERPRETACIÓN: clasificación + texto clínico, sin subrayado.
+  const interpLabelY = resultY + 12;
+  doc.text('INTERPRETACIÓN:', marginX+4, interpLabelY);
+
   doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
-  doc.text(`Clasificación: ${interpretation.category}`, marginX, y);
+  doc.setFontSize(9.3);
+  doc.text(interpretation.category, marginX+39, interpLabelY);
 
-  y += 12;
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(11);
-  doc.text('INTERPRETACIÓN CLÍNICA', marginX, y);
-
-  y += 7;
+  let textY = interpLabelY + 7;
   doc.setFont('helvetica','normal');
-  doc.setFontSize(9.2);
-  const interpretationLines = doc.splitTextToSize(interpretation.text, 184);
-  doc.text(interpretationLines, marginX, y);
-  y += interpretationLines.length * 4.3 + 10;
+  doc.setFontSize(7.7);
+  const interpretationLines = doc.splitTextToSize(interpretation.text, 165);
+  doc.text(interpretationLines, marginX+4, textY);
+  textY += interpretationLines.length * 3.45 + 4;
 
   doc.setFont('helvetica','italic');
-  doc.setFontSize(8.5);
-  const noteLines = doc.splitTextToSize(CLINICAL_NOTE, 184);
-  doc.text(noteLines, marginX, y);
+  doc.setFontSize(7.2);
+  const noteLines = doc.splitTextToSize(CLINICAL_NOTE, 165);
+  doc.text(noteLines, marginX+4, textY);
 
-  addReference(3);
+  addReference(2);
 
   return doc.output('blob');
 }
