@@ -31,18 +31,19 @@ function responsesForTarget(target) {
 }
 
 async function answerQuestionnaire(page, responses) {
+  await page.locator('fieldset.question').first().waitFor({ state: 'attached' });
   for (let i = 1; i <= 27; i++) {
     await page.locator(`input[name="q${i}"][value="${responses[i-1]}"]`).check({ force: true });
   }
 }
 
 test('la página carga 27 preguntas', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await expect(page.locator('fieldset.question')).toHaveCount(27);
 });
 
 test('todos los puntajes 27–135 clasifican correctamente', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   const result = await page.evaluate(() => {
     const failures = [];
     for (let total = 27; total <= 135; total++) {
@@ -62,7 +63,7 @@ test('todos los puntajes 27–135 clasifican correctamente', async ({ page }) =>
 
 for (const total of [27,54,55,81,82,108,109,135]) {
   test(`flujo UI para puntaje ${total}`, async ({ page }) => {
-    await page.goto('/');
+    await page.goto('./');
     const responses = responsesForTarget(total);
     await answerQuestionnaire(page, responses);
 
@@ -84,7 +85,7 @@ for (const total of [27,54,55,81,82,108,109,135]) {
 }
 
 test('no permite generar PDF si falta una respuesta', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   const responses = Array(26).fill('A veces');
   for (let i = 1; i <= 26; i++) {
     await page.locator(`input[name="q${i}"][value="${responses[i-1]}"]`).check({ force: true });
@@ -94,7 +95,7 @@ test('no permite generar PDF si falta una respuesta', async ({ page }) => {
 });
 
 test('genera un Blob PDF válido con cuestionario completo', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await answerQuestionnaire(page, Array(27).fill('A veces'));
 
   const pdfInfo = await page.evaluate(async () => {
